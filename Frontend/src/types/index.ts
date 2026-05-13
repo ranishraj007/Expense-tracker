@@ -41,6 +41,7 @@ export type ExpensePayload = {
 export type ProfilePayload = Partial<
   Pick<User, "name" | "phone" | "username" | "email" | "avatarUrl"> & {
     password: string;
+    oldPassword: string;
   }
 >;
 

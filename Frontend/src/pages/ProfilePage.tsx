@@ -20,7 +20,11 @@ const profileSchema = z.object({
   username: z.string().min(3, "Username needs at least 3 characters."),
   email: z.string().email("Enter a valid email."),
   password: z.string().optional(),
+  oldPassword: z.string().optional(),
   avatarUrl: z.string().url("Use a valid image URL.").or(z.literal("")),
+}).refine((value) => !value.password || Boolean(value.oldPassword), {
+  message: "Current password is required to change password.",
+  path: ["oldPassword"],
 });
 
 type ProfileForm = z.infer<typeof profileSchema>;
@@ -55,6 +59,7 @@ export default function ProfilePage() {
         username: selectedUser.username,
         email: selectedUser.email,
         password: "",
+        oldPassword: "",
         avatarUrl: selectedUser.avatarUrl,
       });
     }
@@ -68,6 +73,7 @@ export default function ProfilePage() {
       ...values,
       avatarUrl: values.avatarUrl || selectedUser.avatarUrl,
       password: values.password || undefined,
+      oldPassword: values.password ? values.oldPassword : undefined,
     };
 
     try {
@@ -160,6 +166,9 @@ export default function ProfilePage() {
                 </div>
                 <Field label="Profile image URL" id="avatarUrl" error={errors.avatarUrl?.message}>
                   <Input id="avatarUrl" disabled={!canEdit} {...register("avatarUrl")} />
+                </Field>
+                <Field label="Current password" id="oldPassword" error={errors.oldPassword?.message}>
+                  <Input id="oldPassword" type="password" disabled={!canEdit} placeholder="Required to change password" {...register("oldPassword")} />
                 </Field>
                 <Field label="New password" id="password" error={errors.password?.message}>
                   <Input id="password" type="password" disabled={!canEdit} placeholder="Leave blank to keep current password" {...register("password")} />

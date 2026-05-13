@@ -1,6 +1,21 @@
 import { z } from "zod";
 
-const categorySchema = z.enum(["Food", "Transport", "Shopping", "Bills", "Entertainment", "Health", "Other"]);
+const categorySchema = z.enum([
+  "Groceries",
+  "School",
+  "Utilities",
+  "Transport",
+  "Health",
+  "Dining",
+  "Salary",
+  "Gift",
+  "Savings",
+  "Food",
+  "Shopping",
+  "Bills",
+  "Entertainment",
+  "Other",
+]);
 const typeSchema = z.enum(["CREDIT", "DEBIT"]).or(z.enum(["credit", "debit"]).transform((value) => value.toUpperCase()));
 
 export const expenseIdSchema = z.object({

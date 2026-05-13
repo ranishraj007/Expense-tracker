@@ -6,7 +6,7 @@ import { createUserSchema, idParamSchema, updateUserSchema } from "../schemas/us
 
 const router = Router();
 
-router.get("/", requireAdmin, listUsers);
+router.get("/", listUsers);
 router.get("/:id", validate(idParamSchema), getUser);
 router.post("/", requireAdmin, validate(createUserSchema), createUser);
 router.put("/:id", validate(updateUserSchema), updateUser);
