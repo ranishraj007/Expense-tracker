@@ -26,13 +26,14 @@ export default function TransactionTable({ transactions, onSortDate, compact = f
             <TableHead>Description</TableHead>
             {!compact ? <TableHead>Category</TableHead> : null}
             <TableHead>Type</TableHead>
+            {!compact ? <TableHead>Status</TableHead> : null}
             <TableHead className="text-right">Amount</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {transactions.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={compact ? 4 : 5} className="py-10 text-center text-muted-foreground">
+              <TableCell colSpan={compact ? 4 : 6} className="py-10 text-center text-muted-foreground">
                 No transactions found.
               </TableCell>
             </TableRow>
@@ -45,6 +46,13 @@ export default function TransactionTable({ transactions, onSortDate, compact = f
                 <TableCell>
                   <Badge variant={transaction.type}>{transaction.type === "credit" ? "Credit" : "Debit"}</Badge>
                 </TableCell>
+                {!compact ? (
+                  <TableCell>
+                    <Badge variant={transaction.status === "pending" ? "pending" : "muted"}>
+                      {transaction.status === "pending" ? "Pending" : "Completed"}
+                    </Badge>
+                  </TableCell>
+                ) : null}
                 <TableCell className="text-right font-semibold">{formatCurrency(transaction.amount)}</TableCell>
               </TableRow>
             ))

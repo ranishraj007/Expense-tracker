@@ -1,5 +1,6 @@
 export type UserRole = "admin" | "member";
 export type TransactionType = "credit" | "debit";
+export type TransactionStatus = "completed" | "pending";
 
 export type User = {
   id: string;
@@ -19,9 +20,13 @@ export type Transaction = {
   id: string;
   userId: string;
   date: string;
+  dueDate?: string | null;
   description: string;
   category: string;
   type: TransactionType;
+  status: TransactionStatus;
+  personName?: string | null;
+  personPhone?: string | null;
   amount: number;
 };
 
@@ -34,8 +39,12 @@ export type ExpensePayload = {
   amount: number;
   description: string;
   date: string;
+  dueDate?: string;
   category: string;
   type: TransactionType;
+  status?: TransactionStatus;
+  personName?: string;
+  personPhone?: string;
 };
 
 export type ProfilePayload = Partial<
@@ -55,5 +64,6 @@ export type TransactionFilters = {
   date: string;
   category: string;
   type: "all" | TransactionType;
+  status: "all" | TransactionStatus;
   sort: "newest" | "oldest" | "amount-high" | "amount-low";
 };

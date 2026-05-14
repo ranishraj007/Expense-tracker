@@ -27,8 +27,12 @@ model Expense {
   amount      Float
   description String
   date        DateTime
+  dueDate     DateTime?
   category    String
   type        String
+  status      String   @default("COMPLETED")
+  personName  String?
+  personPhone String?
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())
@@ -37,4 +41,5 @@ model Expense {
   @@index([userId, date])
   @@index([category])
   @@index([type])
+  @@index([status])
 }

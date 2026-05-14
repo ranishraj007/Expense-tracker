@@ -7,11 +7,14 @@ import type { ExpensePayload, Transaction } from "@/types";
 const useMock = import.meta.env.VITE_USE_MOCK_API === "true";
 
 export const expenseService = {
-  async list(options?: { all?: boolean }): Promise<Transaction[]> {
-    if (useMock) return mockApi.getTransactions();
+  async list(options?: { all?: boolean; status?: Transaction["status"] }): Promise<Transaction[]> {
+    if (useMock) return mockApi.getTransactions(options);
 
     const { data } = await api.get<ApiEnvelope<ApiExpense[]> | ApiExpense[]>("/expenses", {
-      params: options?.all ? { all: "true" } : undefined,
+      params: {
+        ...(options?.all ? { all: "true" } : {}),
+        ...(options?.status ? { status: options.status } : {}),
+      },
     });
     return unwrapApiData(data).map(normalizeTransaction);
   },

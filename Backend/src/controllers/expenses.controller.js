@@ -9,6 +9,7 @@ function expenseWhereForUser(req, filters = {}) {
   if (!adminAll) where.userId = req.user.id;
   if (filters.category) where.category = filters.category;
   if (filters.type) where.type = filters.type;
+  if (filters.status) where.status = filters.status;
   if (filters.startDate || filters.endDate) {
     where.date = {};
     if (filters.startDate) where.date.gte = parseDate(filters.startDate);
@@ -50,8 +51,12 @@ export async function createExpense(req, res) {
       amount: payload.amount,
       description: payload.description,
       date: parseDate(payload.date),
+      dueDate: payload.dueDate ? parseDate(payload.dueDate) : null,
       category: payload.category,
       type: payload.type,
+      status: payload.status,
+      personName: payload.status === "PENDING" ? payload.personName : null,
+      personPhone: payload.status === "PENDING" ? payload.personPhone : null,
       userId: req.user.id,
     },
   });
@@ -67,6 +72,12 @@ export async function updateExpense(req, res) {
   const payload = req.validated.body;
   const data = { ...payload };
   if (payload.date) data.date = parseDate(payload.date);
+  if (payload.dueDate) data.dueDate = parseDate(payload.dueDate);
+  if (payload.status === "COMPLETED") {
+    data.personName = null;
+    data.personPhone = null;
+    data.dueDate = null;
+  }
 
   const updated = await prisma.expense.update({ where: { id: expense.id }, data });
   return sendSuccess(res, updated, "Expense updated.");

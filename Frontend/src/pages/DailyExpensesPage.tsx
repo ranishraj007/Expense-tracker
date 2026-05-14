@@ -14,13 +14,14 @@ import type { TransactionFilters } from "@/types";
 export default function DailyExpensesPage() {
   const { user } = useAuth();
   const { transactions, isLoading, error, addExpense } = useExpenses(user?.id);
-  const [filters, setFilters] = useState<TransactionFilters>({ date: "", category: "all", type: "all", sort: "newest" });
+  const [filters, setFilters] = useState<TransactionFilters>({ date: "", category: "all", type: "all", status: "all", sort: "newest" });
 
   const filteredTransactions = useMemo(() => {
     return transactions
       .filter((transaction) => (filters.date ? transaction.date === filters.date : true))
       .filter((transaction) => (filters.category !== "all" ? transaction.category === filters.category : true))
       .filter((transaction) => (filters.type !== "all" ? transaction.type === filters.type : true))
+      .filter((transaction) => (filters.status !== "all" ? transaction.status === filters.status : true))
       .sort((a, b) => {
         if (filters.sort === "oldest") return a.date.localeCompare(b.date);
         if (filters.sort === "amount-high") return b.amount - a.amount;
@@ -46,7 +47,7 @@ export default function DailyExpensesPage() {
           <Filter className="size-5 text-primary" />
           <h3 className="font-semibold">Filters</h3>
         </div>
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-5">
           <div className="grid gap-2">
             <Label htmlFor="filter-date">Date</Label>
             <Input id="filter-date" type="date" value={filters.date} onChange={(event) => setFilters({ ...filters, date: event.target.value })} />
@@ -91,6 +92,19 @@ export default function DailyExpensesPage() {
                 <SelectItem value="oldest">Oldest first</SelectItem>
                 <SelectItem value="amount-high">Amount high to low</SelectItem>
                 <SelectItem value="amount-low">Amount low to high</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid gap-2">
+            <Label>Status</Label>
+            <Select value={filters.status} onValueChange={(status) => setFilters({ ...filters, status: status as TransactionFilters["status"] })}>
+              <SelectTrigger>
+                <SelectValue placeholder="All statuses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All statuses</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
               </SelectContent>
             </Select>
           </div>

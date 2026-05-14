@@ -15,8 +15,24 @@ const expenseSchema = z.object({
   amount: z.coerce.number().positive("Amount must be greater than zero."),
   description: z.string().min(2, "Description is required."),
   date: z.string().min(1, "Date is required."),
+  dueDate: z.string().optional(),
   category: z.string().min(1, "Choose a category."),
   type: z.enum(["credit", "debit"]),
+  status: z.enum(["completed", "pending"]),
+  personName: z.string().optional(),
+  personPhone: z.string().optional(),
+}).superRefine((values, ctx) => {
+  if (values.status !== "pending") return;
+
+  if (!values.personName?.trim()) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["personName"], message: "Person name is required." });
+  }
+  if (!values.personPhone?.trim()) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["personPhone"], message: "Phone number is required." });
+  }
+  if (!values.dueDate) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["dueDate"], message: "Date to pay is required." });
+  }
 });
 
 type ExpenseForm = z.infer<typeof expenseSchema>;
@@ -37,17 +53,27 @@ export default function AddExpenseDialog({ onAdd }: { onAdd: (payload: ExpensePa
       amount: 0,
       description: "",
       date: new Date().toISOString().slice(0, 10),
+      dueDate: "",
       category: "Groceries",
       type: "debit",
+      status: "completed",
+      personName: "",
+      personPhone: "",
     },
   });
 
   const selectedType = watch("type");
+  const selectedStatus = watch("status");
 
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null);
     try {
-      await onAdd(values);
+      await onAdd({
+        ...values,
+        dueDate: values.status === "pending" ? values.dueDate : undefined,
+        personName: values.status === "pending" ? values.personName?.trim() : undefined,
+        personPhone: values.status === "pending" ? values.personPhone?.trim() : undefined,
+      });
       reset();
       setOpen(false);
     } catch (err) {
@@ -69,7 +95,7 @@ export default function AddExpenseDialog({ onAdd }: { onAdd: (payload: ExpensePa
             <WalletCards className="size-5 text-primary" />
             Add family transaction
           </DialogTitle>
-          <DialogDescription>Credit adds money to the household balance. Debit records spending.</DialogDescription>
+          <DialogDescription>Credit can record money to take later. Debit can record money to pay later.</DialogDescription>
         </DialogHeader>
 
         <form className="grid gap-4" onSubmit={onSubmit}>
@@ -126,6 +152,44 @@ export default function AddExpenseDialog({ onAdd }: { onAdd: (payload: ExpensePa
               ))}
             </div>
           </div>
+
+          <div className="grid gap-2">
+            <Label>Status</Label>
+            <div className="grid grid-cols-2 gap-2">
+              {(["completed", "pending"] as const).map((status) => (
+                <Button
+                  key={status}
+                  type="button"
+                  variant={selectedStatus === status ? "default" : "outline"}
+                  onClick={() => setValue("status", status, { shouldValidate: true })}
+                >
+                  {status === "pending" ? "Pending" : "Completed"}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {selectedStatus === "pending" ? (
+            <div className="grid gap-4 rounded-lg border bg-muted/35 p-4 sm:grid-cols-2">
+              <div className="grid gap-2">
+                <Label htmlFor="personName">Person name</Label>
+                <Input id="personName" placeholder="Name" {...register("personName")} />
+                {errors.personName ? <p className="text-sm text-destructive">{errors.personName.message}</p> : null}
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="personPhone">Phone number</Label>
+                <Input id="personPhone" placeholder="+977 98..." {...register("personPhone")} />
+                {errors.personPhone ? <p className="text-sm text-destructive">{errors.personPhone.message}</p> : null}
+              </div>
+
+              <div className="grid gap-2 sm:col-span-2">
+                <Label htmlFor="dueDate">Date to pay</Label>
+                <Input id="dueDate" type="date" {...register("dueDate")} />
+                {errors.dueDate ? <p className="text-sm text-destructive">{errors.dueDate.message}</p> : null}
+              </div>
+            </div>
+          ) : null}
 
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>

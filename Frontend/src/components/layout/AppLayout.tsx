@@ -1,4 +1,4 @@
-import { Home, LogOut, ReceiptText, ShieldCheck, UserRound } from "lucide-react";
+import { CalendarClock, Home, LogOut, ReceiptText, ShieldCheck, UserRound } from "lucide-react";
 import { NavLink, Outlet } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,7 @@ export default function AppLayout() {
   const navItems = [
     { to: "/dashboard", label: "Dashboard", icon: Home },
     { to: "/expenses", label: "Daily expenses", icon: ReceiptText },
+    { to: "/pending", label: "Pending", icon: CalendarClock },
     { to: "/profiles", label: "Profiles", icon: UserRound },
     ...(user?.role === "admin" ? [{ to: "/admin", label: "Admin", icon: ShieldCheck }] : []),
   ];

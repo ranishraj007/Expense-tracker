@@ -8,7 +8,7 @@ export function buildDailyExpenses(transactions: Transaction[]) {
   return days.map((day) => {
     const key = format(day, "yyyy-MM-dd");
     const total = transactions
-      .filter((transaction) => transaction.type === "debit" && transaction.date === key)
+      .filter((transaction) => transaction.status !== "pending" && transaction.type === "debit" && transaction.date === key)
       .reduce((sum, transaction) => sum + Number(transaction.amount), 0);
 
     return {
@@ -27,7 +27,7 @@ export function buildMonthlyExpenses(transactions: Transaction[]) {
       amount: transactions
         .filter((transaction) => {
           const parsed = parseISO(transaction.date);
-          return transaction.type === "debit" && isSameYear(parsed, now) && getMonth(parsed) === getMonth(day);
+          return transaction.status !== "pending" && transaction.type === "debit" && isSameYear(parsed, now) && getMonth(parsed) === getMonth(day);
         })
         .reduce((sum, transaction) => sum + Number(transaction.amount), 0),
     }));
@@ -40,6 +40,7 @@ export function getCurrentMonthTotals(transactions: Transaction[]) {
   return transactions.reduce(
     (totals, transaction) => {
       if (!isSameMonth(parseISO(transaction.date), now)) return totals;
+      if (transaction.status === "pending") return totals;
       totals[transaction.type] += Number(transaction.amount);
       return totals;
     },

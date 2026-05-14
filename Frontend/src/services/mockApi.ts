@@ -69,13 +69,18 @@ export const mockApi = {
     return delay(undefined);
   },
 
-  async getTransactions(): Promise<Transaction[]> {
-    return delay([...transactions].sort((a, b) => b.date.localeCompare(a.date)));
+  async getTransactions(options?: { status?: Transaction["status"] }): Promise<Transaction[]> {
+    const filtered = options?.status ? transactions.filter((transaction) => transaction.status === options.status) : transactions;
+    return delay([...filtered].sort((a, b) => b.date.localeCompare(a.date)));
   },
 
   async addTransaction(payload: ExpensePayload, userId: string): Promise<Transaction> {
     const transaction = {
       ...payload,
+      status: payload.status || "completed",
+      dueDate: payload.dueDate || null,
+      personName: payload.personName || null,
+      personPhone: payload.personPhone || null,
       userId,
       amount: Number(payload.amount),
       id: `t-${Date.now()}`,
