@@ -2,6 +2,7 @@ import { CalendarClock, Phone, UserRound } from "lucide-react";
 import { useMemo } from "react";
 import ErrorMessage from "@/components/common/ErrorMessage";
 import AddExpenseDialog from "@/components/expenses/AddExpenseDialog";
+import ExpenseActions from "@/components/expenses/ExpenseActions";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useAuth } from "@/context/AuthContext";
@@ -10,7 +11,7 @@ import { formatCurrency, formatDate } from "@/utils/formatters";
 
 export default function PendingCreditsPage() {
   const { user } = useAuth();
-  const { transactions, isLoading, error, addExpense } = useExpenses(user?.id);
+  const { transactions, isLoading, error, addExpense, updateExpense, deleteExpense } = useExpenses(user?.id);
   const pendingTransactions = useMemo(
     () => transactions.filter((transaction) => transaction.status === "pending"),
     [transactions],
@@ -61,12 +62,13 @@ export default function PendingCreditsPage() {
               <TableHead>Date to pay</TableHead>
               <TableHead>Type</TableHead>
               <TableHead className="text-right">Amount</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {pendingTransactions.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="py-10 text-center text-muted-foreground">
+                <TableCell colSpan={8} className="py-10 text-center text-muted-foreground">
                   {isLoading ? "Loading pending entries..." : "No pending credits or debits found."}
                 </TableCell>
               </TableRow>
@@ -97,6 +99,9 @@ export default function PendingCreditsPage() {
                     <Badge variant={transaction.type}>{transaction.type === "credit" ? "Take later" : "Pay later"}</Badge>
                   </TableCell>
                   <TableCell className="text-right font-semibold">{formatCurrency(transaction.amount)}</TableCell>
+                  <TableCell className="min-w-48 text-right">
+                    <ExpenseActions transaction={transaction} onUpdate={updateExpense} onDelete={deleteExpense} />
+                  </TableCell>
                 </TableRow>
               ))
             )}

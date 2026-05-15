@@ -60,10 +60,16 @@ export async function updateUser(req, res) {
 
   const nextPassword = payload.newPassword || payload.password;
   if (nextPassword) {
-    if (!isSelf) return sendError(res, 403, "Only users can change their own password.");
+    if (isSelf) {
+      if (!payload.oldPassword) return sendError(res, 400, "Old password is required to update password.");
 
-    const oldPasswordMatches = await bcrypt.compare(payload.oldPassword, target.password);
-    if (!oldPasswordMatches) return sendError(res, 400, "Old password is incorrect.");
+      const oldPasswordMatches = await bcrypt.compare(payload.oldPassword, target.password);
+      if (!oldPasswordMatches) return sendError(res, 400, "Old password is incorrect.");
+    } else if (!isAdmin) {
+      return sendError(res, 403, "Only admins can reset another user's password.");
+    } else if (target.role === "ADMIN") {
+      return sendError(res, 400, "The admin account password cannot be reset by another admin.");
+    }
 
     data.password = await bcrypt.hash(nextPassword, rounds());
   }

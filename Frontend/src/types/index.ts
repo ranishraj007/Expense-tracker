@@ -51,6 +51,7 @@ export type ProfilePayload = Partial<
   Pick<User, "name" | "phone" | "username" | "email" | "avatarUrl"> & {
     password: string;
     oldPassword: string;
+    newPassword: string;
   }
 >;
 

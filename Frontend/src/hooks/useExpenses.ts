@@ -33,5 +33,17 @@ export function useExpenses(userId?: string) {
     [userId],
   );
 
-  return { transactions, isLoading, error, reload: loadTransactions, addExpense };
+  const updateExpense = useCallback(async (transactionId: string, payload: ExpensePayload) => {
+    const updated = await expenseService.update(transactionId, payload);
+    setTransactions((current) => current.map((transaction) => (transaction.id === transactionId ? updated : transaction)));
+    return updated;
+  }, []);
+
+  const deleteExpense = useCallback(async (transactionId: string) => {
+    const deletedId = await expenseService.remove(transactionId);
+    setTransactions((current) => current.filter((transaction) => transaction.id !== deletedId));
+    return deletedId;
+  }, []);
+
+  return { transactions, isLoading, error, reload: loadTransactions, addExpense, updateExpense, deleteExpense };
 }

@@ -29,4 +29,18 @@ export const expenseService = {
     const { data } = await api.post<ApiEnvelope<ApiExpense> | ApiExpense>("/expenses", payload);
     return normalizeTransaction(unwrapApiData(data));
   },
+
+  async update(transactionId: string, payload: ExpensePayload): Promise<Transaction> {
+    if (useMock) return mockApi.updateTransaction(transactionId, payload);
+
+    const { data } = await api.put<ApiEnvelope<ApiExpense> | ApiExpense>(`/expenses/${transactionId}`, payload);
+    return normalizeTransaction(unwrapApiData(data));
+  },
+
+  async remove(transactionId: string): Promise<string> {
+    if (useMock) return mockApi.deleteTransaction(transactionId);
+
+    const { data } = await api.delete<ApiEnvelope<{ id: string }> | { id: string }>(`/expenses/${transactionId}`);
+    return unwrapApiData(data).id;
+  },
 };

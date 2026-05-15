@@ -35,9 +35,6 @@ export const updateUserSchema = z.object({
     email: z.string().email().optional().nullable(),
     profileImage: optionalUrl,
     avatarUrl: optionalUrl,
-  }).refine((value) => !(value.newPassword || value.password) || value.oldPassword, {
-    message: "Old password is required to update password.",
-    path: ["oldPassword"],
   }),
   query: z.object({}).passthrough(),
 });

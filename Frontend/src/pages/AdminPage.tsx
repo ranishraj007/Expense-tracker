@@ -4,6 +4,7 @@ import { Navigate } from "react-router-dom";
 import ErrorMessage from "@/components/common/ErrorMessage";
 import TransactionTable from "@/components/expenses/TransactionTable";
 import CreateUserDialog from "@/components/users/CreateUserDialog";
+import ResetUserPasswordDialog from "@/components/users/ResetUserPasswordDialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -31,7 +32,7 @@ function AdminStat({ title, value, icon: Icon }: { title: string; value: string;
 
 export default function AdminPage() {
   const { user } = useAuth();
-  const { users, isLoading, error, createUser, removeUser } = useUsers();
+  const { users, isLoading, error, createUser, removeUser, resetUserPassword } = useUsers();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [activityError, setActivityError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -136,16 +137,19 @@ export default function AdminPage() {
                   <TableCell>
                     <Badge variant={isProtectedAdmin ? "default" : "muted"}>{profile.role}</Badge>
                   </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      disabled={isProtectedAdmin || deletingId === profile.id}
-                      onClick={() => void handleRemove(profile.id, profile.name)}
-                    >
-                      <Trash2 />
-                      {deletingId === profile.id ? "Removing..." : "Remove"}
-                    </Button>
+                  <TableCell>
+                    <div className="flex justify-end gap-2">
+                      <ResetUserPasswordDialog user={profile} disabled={isProtectedAdmin} onReset={resetUserPassword} />
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        disabled={isProtectedAdmin || deletingId === profile.id}
+                        onClick={() => void handleRemove(profile.id, profile.name)}
+                      >
+                        <Trash2 />
+                        {deletingId === profile.id ? "Removing..." : "Remove"}
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               );

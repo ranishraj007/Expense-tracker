@@ -36,7 +36,19 @@ export const mockApi = {
   },
 
   async updateProfile(userId: string, payload: ProfilePayload): Promise<User> {
-    users = users.map((user) => (user.id === userId ? { ...user, ...payload } : user));
+    users = users.map((user) => {
+      if (user.id !== userId) return user;
+
+      return {
+        ...user,
+        ...(payload.name !== undefined ? { name: payload.name } : {}),
+        ...(payload.phone !== undefined ? { phone: payload.phone } : {}),
+        ...(payload.username !== undefined ? { username: payload.username } : {}),
+        ...(payload.email !== undefined ? { email: payload.email } : {}),
+        ...(payload.avatarUrl !== undefined ? { avatarUrl: payload.avatarUrl } : {}),
+        password: payload.newPassword || payload.password || user.password,
+      };
+    });
     const updated = users.find((user) => user.id === userId);
     if (!updated) throw new Error("User not found.");
     return delay(sanitizeUser(updated));
@@ -87,5 +99,31 @@ export const mockApi = {
     };
     transactions = [transaction, ...transactions];
     return delay(transaction);
+  },
+
+  async updateTransaction(transactionId: string, payload: ExpensePayload): Promise<Transaction> {
+    const existing = transactions.find((transaction) => transaction.id === transactionId);
+    if (!existing) throw new Error("Transaction not found.");
+
+    const updated: Transaction = {
+      ...existing,
+      ...payload,
+      amount: Number(payload.amount),
+      status: payload.status || "completed",
+      dueDate: payload.status === "pending" ? payload.dueDate || null : null,
+      personName: payload.status === "pending" ? payload.personName || null : null,
+      personPhone: payload.status === "pending" ? payload.personPhone || null : null,
+    };
+
+    transactions = transactions.map((transaction) => (transaction.id === transactionId ? updated : transaction));
+    return delay(updated);
+  },
+
+  async deleteTransaction(transactionId: string): Promise<string> {
+    const existing = transactions.find((transaction) => transaction.id === transactionId);
+    if (!existing) throw new Error("Transaction not found.");
+
+    transactions = transactions.filter((transaction) => transaction.id !== transactionId);
+    return delay(transactionId);
   },
 };

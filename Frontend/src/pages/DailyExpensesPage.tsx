@@ -13,7 +13,7 @@ import type { TransactionFilters } from "@/types";
 
 export default function DailyExpensesPage() {
   const { user } = useAuth();
-  const { transactions, isLoading, error, addExpense } = useExpenses(user?.id);
+  const { transactions, isLoading, error, addExpense, updateExpense, deleteExpense } = useExpenses(user?.id);
   const [filters, setFilters] = useState<TransactionFilters>({ date: "", category: "all", type: "all", status: "all", sort: "newest" });
 
   const filteredTransactions = useMemo(() => {
@@ -119,6 +119,8 @@ export default function DailyExpensesPage() {
       <TransactionTable
         transactions={filteredTransactions}
         onSortDate={() => setFilters({ ...filters, sort: filters.sort === "newest" ? "oldest" : "newest" })}
+        onUpdate={updateExpense}
+        onDelete={deleteExpense}
       />
     </>
   );
