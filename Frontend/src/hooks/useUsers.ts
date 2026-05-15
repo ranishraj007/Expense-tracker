@@ -41,5 +41,11 @@ export function useUsers() {
     return deletedId;
   }, []);
 
-  return { users, isLoading, error, reload: loadUsers, updateProfile, createUser, removeUser };
+  const resetUserPassword = useCallback(async (userId: string, newPassword: string) => {
+    const updated = await userService.updateProfile(userId, { newPassword });
+    setUsers((current) => current.map((user) => (user.id === userId ? updated : user)));
+    return updated;
+  }, []);
+
+  return { users, isLoading, error, reload: loadUsers, updateProfile, createUser, removeUser, resetUserPassword };
 }

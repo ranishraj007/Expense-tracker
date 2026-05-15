@@ -36,7 +36,19 @@ export const mockApi = {
   },
 
   async updateProfile(userId: string, payload: ProfilePayload): Promise<User> {
-    users = users.map((user) => (user.id === userId ? { ...user, ...payload } : user));
+    users = users.map((user) => {
+      if (user.id !== userId) return user;
+
+      return {
+        ...user,
+        ...(payload.name !== undefined ? { name: payload.name } : {}),
+        ...(payload.phone !== undefined ? { phone: payload.phone } : {}),
+        ...(payload.username !== undefined ? { username: payload.username } : {}),
+        ...(payload.email !== undefined ? { email: payload.email } : {}),
+        ...(payload.avatarUrl !== undefined ? { avatarUrl: payload.avatarUrl } : {}),
+        password: payload.newPassword || payload.password || user.password,
+      };
+    });
     const updated = users.find((user) => user.id === userId);
     if (!updated) throw new Error("User not found.");
     return delay(sanitizeUser(updated));
