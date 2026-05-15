@@ -88,4 +88,30 @@ export const mockApi = {
     transactions = [transaction, ...transactions];
     return delay(transaction);
   },
+
+  async updateTransaction(transactionId: string, payload: ExpensePayload): Promise<Transaction> {
+    const existing = transactions.find((transaction) => transaction.id === transactionId);
+    if (!existing) throw new Error("Transaction not found.");
+
+    const updated: Transaction = {
+      ...existing,
+      ...payload,
+      amount: Number(payload.amount),
+      status: payload.status || "completed",
+      dueDate: payload.status === "pending" ? payload.dueDate || null : null,
+      personName: payload.status === "pending" ? payload.personName || null : null,
+      personPhone: payload.status === "pending" ? payload.personPhone || null : null,
+    };
+
+    transactions = transactions.map((transaction) => (transaction.id === transactionId ? updated : transaction));
+    return delay(updated);
+  },
+
+  async deleteTransaction(transactionId: string): Promise<string> {
+    const existing = transactions.find((transaction) => transaction.id === transactionId);
+    if (!existing) throw new Error("Transaction not found.");
+
+    transactions = transactions.filter((transaction) => transaction.id !== transactionId);
+    return delay(transactionId);
+  },
 };

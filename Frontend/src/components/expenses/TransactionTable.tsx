@@ -1,17 +1,22 @@
 import { ArrowDownUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import ExpenseActions from "@/components/expenses/ExpenseActions";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import type { Transaction } from "@/types";
+import type { ExpensePayload, Transaction } from "@/types";
 import { formatCurrency, formatDate } from "@/utils/formatters";
 
 type TransactionTableProps = {
   transactions: Transaction[];
   onSortDate?: () => void;
   compact?: boolean;
+  onUpdate?: (transactionId: string, payload: ExpensePayload) => Promise<unknown>;
+  onDelete?: (transactionId: string) => Promise<unknown>;
 };
 
-export default function TransactionTable({ transactions, onSortDate, compact = false }: TransactionTableProps) {
+export default function TransactionTable({ transactions, onSortDate, compact = false, onUpdate, onDelete }: TransactionTableProps) {
+  const canManage = Boolean(onUpdate && onDelete);
+
   return (
     <div className="surface overflow-hidden">
       <Table>
@@ -28,12 +33,13 @@ export default function TransactionTable({ transactions, onSortDate, compact = f
             <TableHead>Type</TableHead>
             {!compact ? <TableHead>Status</TableHead> : null}
             <TableHead className="text-right">Amount</TableHead>
+            {canManage ? <TableHead className="text-right">Actions</TableHead> : null}
           </TableRow>
         </TableHeader>
         <TableBody>
           {transactions.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={compact ? 4 : 6} className="py-10 text-center text-muted-foreground">
+              <TableCell colSpan={(compact ? 4 : 6) + (canManage ? 1 : 0)} className="py-10 text-center text-muted-foreground">
                 No transactions found.
               </TableCell>
             </TableRow>
@@ -54,6 +60,11 @@ export default function TransactionTable({ transactions, onSortDate, compact = f
                   </TableCell>
                 ) : null}
                 <TableCell className="text-right font-semibold">{formatCurrency(transaction.amount)}</TableCell>
+                {onUpdate && onDelete ? (
+                  <TableCell className="min-w-48 text-right">
+                    <ExpenseActions transaction={transaction} onUpdate={onUpdate} onDelete={onDelete} />
+                  </TableCell>
+                ) : null}
               </TableRow>
             ))
           )}
